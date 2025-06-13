@@ -145,6 +145,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     )
 }
+
 CORS_ALLOWED_ORIGINS = [
     "*",
 ]
