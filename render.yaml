@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: django-backend
+    env: python
+    buildCommand: ""
+    startCommand: gunicorn Assignment1.wsgi:application
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: Assignment1.settings
+      - key: PYTHON_VERSION
+        value: 3.11
