@@ -1,7 +1,7 @@
 # reservations/serializers.py
 
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from rest_framework import serializers
 
 from .models import Room, Reservation
 
@@ -26,3 +26,4 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'is_staff', 'is_active']
+        read_only_fields = ['is_staff', 'is_active']
