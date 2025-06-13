@@ -1,0 +1,102 @@
+[
+  {
+    "model": "reservations.room",
+    "pk": 1,
+    "fields": {
+      "name": "Room A",
+      "location": "First Floor",
+      "capacity": 10,
+      "description": "Meeting room with whiteboard"
+    }
+  },
+  {
+    "model": "reservations.room",
+    "pk": 2,
+    "fields": {
+      "name": "Room B",
+      "location": "Second Floor",
+      "capacity": 8,
+      "description": ""
+    }
+  },
+  {
+    "model": "reservations.room",
+    "pk": 3,
+    "fields": {
+      "name": "Room C",
+      "location": "Main Building",
+      "capacity": 15,
+      "description": "Large conference room"
+    }
+  },
+  {
+    "model": "reservations.room",
+    "pk": 4,
+    "fields": {
+      "name": "Room D",
+      "location": "Annex",
+      "capacity": 6,
+      "description": ""
+    }
+  },
+  {
+    "model": "reservations.room",
+    "pk": 5,
+    "fields": {
+      "name": "Room E",
+      "location": "Main Building",
+      "capacity": 12,
+      "description": "With projector"
+    }
+  },
+  {
+    "model": "reservations.room",
+    "pk": 6,
+    "fields": {
+      "name": "Room F",
+      "location": "Third Floor",
+      "capacity": 9,
+      "description": ""
+    }
+  },
+  {
+    "model": "reservations.room",
+    "pk": 7,
+    "fields": {
+      "name": "Room G",
+      "location": "Basement",
+      "capacity": 4,
+      "description": "Quiet small room"
+    }
+  },
+  {
+    "model": "reservations.room",
+    "pk": 8,
+    "fields": {
+      "name": "Room H",
+      "location": "Main Entrance",
+      "capacity": 11,
+      "description": ""
+    }
+  },
+  {
+    "model": "reservations.room",
+    "pk": 9,
+    "fields": {
+      "name": "Room I",
+      "location": "Second Floor",
+      "capacity": 7,
+      "description": ""
+    }
+  },
+  {
+    "model": "reservations.room",
+    "pk": 10,
+    "fields": {
+      "name": "Room J",
+      "location": "Top Floor",
+      "capacity": 5,
+      "description": ""
+    }
+  }
+]

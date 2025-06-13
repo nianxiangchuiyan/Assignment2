@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load timeslots %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+    <h2 class="mb-4">My Reservations</h2>
+
+    {% if reservations %}
+        <table class="table table-bordered text-center">
+            <thead>
+            <tr>
+                <th>Room</th>
+                <th>Date</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for res in reservations %}
+                <tr>
+                    <td>{{ res.room.name }}</td>
+                    <td>{{ res.start_time|date:"Y-m-d" }}</td>
+                    <td>{{ res.start_time|time:"H:i" }}</td>
+                    <td>{{ res.end_time|time:"H:i" }}</td>
+                    <td>
+                        <!-- Cancel form -->
+                        <form method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="cancel">
+                            <input type="hidden" name="reservation_id" value="{{ res.id }}">
+                            <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                        </form>
+
+                        <!-- Edit form -->
+                        <form method="post" style="display:inline;" class="d-inline ms-2">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="edit">
+                            <input type="hidden" name="reservation_id" value="{{ res.id }}">
+                            <!-- Start time select -->
+                            <select name="start_time" class="form-select d-inline w-auto" required>
+                                {% for t in time_options_start %}
+                                    <option value="{{ t }}"
+                                            {% if t == res.start_time|time:"H:i" %}selected{% endif %}>{{ t }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <!-- End time select -->
+                            <select name="end_time" class="form-select d-inline w-auto" required>
+                                {% for t in time_options_end %}
+                                    <option value="{{ t }}"
+                                            {% if t == res.end_time|time:"H:i" %}selected{% endif %}>{{ t }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm">Edit</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>You have no reservations yet.</p>
+    {% endif %}
+{% endblock %}

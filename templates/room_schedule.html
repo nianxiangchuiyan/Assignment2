@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Room {{ room.name }} – Reservations for Today</title>
+    <!-- Bootstrap CSS (assumed to be included via static files) -->
+</head>
+<body class="p-3">
+<h1>Room {{ room.name }} – Schedule for {{ today|date:"Y-m-d" }}</h1>
+<div class="container text-center">
+    <!-- Flex container for time blocks -->
+    <div class="d-flex flex-wrap justify-content-center">
+        {% for slot in slots %}
+            <div class="time-block border rounded m-1
+                    {% if slot.status == 'booked' %} bg-danger text-white
+                    {% else %} bg-success text-white {% endif %}"
+                 data-index="{{ forloop.counter0 }}" data-time="{{ slot.time }}">
+                {{ slot.time }}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Reservation form -->
+<form method="post" class="mt-3">
+    {% csrf_token %}
+    <input type="hidden" name="start_time" id="start_time_input">
+    <input type="hidden" name="end_time" id="end_time_input">
+    <button type="submit" id="reserveBtn" class="btn btn-primary" disabled>Reserve</button>
+</form>
+
+<!-- Inline CSS to define size of the time blocks as squares -->
+<style>
+    .time-block {
+        width: 4rem; /* Each block is a square 4rem x 4rem */
+        height: 4rem;
+        line-height: 4rem; /* Centers the text vertically */
+        cursor: pointer;
+    }
+</style>
+
+<!-- JavaScript for handling clicks and selection -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const blocks = document.querySelectorAll('.time-block');
+        const startInput = document.getElementById('start_time_input');
+        const endInput = document.getElementById('end_time_input');
+        const reserveBtn = document.getElementById('reserveBtn');
+
+        let startIndex = null;   // index of first selected block
+        let endIndex = null;     // index of second selected block
+
+        blocks.forEach(block => {
+            block.addEventListener('click', () => {
+                // Ignore clicks on booked (red) slots
+                if (block.classList.contains('bg-danger')) {
+                    return;  // cannot select already booked slot
+                }
+                const index = parseInt(block.dataset.index);
+                // If no start selected yet, choose this as start
+                if (startIndex === null) {
+                    startIndex = index;
+                    // highlight this block as selected start
+                    block.classList.remove('bg-success');
+                    block.classList.add('bg-warning');
+                }
+                // If a start is already selected and we are picking an end
+                else if (endIndex === null) {
+                    endIndex = index;
+                    // Ensure startIndex is less than endIndex (swap if needed)
+                    if (endIndex < startIndex) {
+                        [startIndex, endIndex] = [endIndex, startIndex];
+                    }
+                    if (startIndex === endIndex) {
+                        endIndex = index;
+                        reserveBtn.disabled = false;
+                        startInput.value = blocks[startIndex].dataset.time;
+
+                        let [h, m] = blocks[endIndex].dataset.time.split(':').map(Number);
+                        m += 30;
+                        if (m === 60) {
+                            h += 1;
+                            m = 0;
+                        }
+                        const endTimeStr = ('0' + h).slice(-2) + ':' + ('0' + m).slice(-2);
+                        endInput.value = endTimeStr;
+
+                        blocks[startIndex].classList.remove('bg-success');
+                        blocks[startIndex].classList.add('bg-warning');
+                        return;
+                    }
+
+                    // Check for any booked slots in between
+                    let conflict = false;
+                    blocks.forEach(b => {
+                        const i = parseInt(b.dataset.index);
+                        if (i >= startIndex && i <= endIndex && b.classList.contains('bg-danger')) {
+                            conflict = true;
+                        }
+                    });
+                    if (conflict) {
+                        // Conflict found: reset selection and alert user
+                        alert("Selected range includes an already booked slot. Please choose a different range.");
+                        // Remove yellow highlighting from the initially selected start block
+                        blocks.forEach(b => {
+                            if (b.classList.contains('bg-warning')) {
+                                b.classList.remove('bg-warning');
+                                b.classList.add('bg-success');
+                            }
+                        });
+                        startIndex = endIndex = null;
+                    } else {
+                        // No conflict: highlight all blocks in range as selected
+                        blocks.forEach(b => {
+                            const i = parseInt(b.dataset.index);
+                            if (i >= startIndex && i <= endIndex && b.classList.contains('bg-success')) {
+                                b.classList.remove('bg-success');
+                                b.classList.add('bg-warning');
+                            }
+                        });
+                        // Enable the Reserve button and set form inputs
+                        reserveBtn.disabled = false;
+                        startInput.value = blocks[startIndex].dataset.time;
+                        // endInput value: we take the *end time* of the last block. Each block's label is its start time.
+                        // Compute end time by adding 30 minutes to the end block’s start:
+                        let [h, m] = blocks[endIndex].dataset.time.split(':').map(Number);
+                        m += 30;
+                        if (m === 60) {
+                            h += 1;
+                            m = 0;
+                        }
+                        // format back to HH:MM
+                        const endTimeStr = ('0' + h).slice(-2) + ':' + ('0' + m).slice(-2);
+                        endInput.value = endTimeStr;
+                    }
+                }
+                // If a range was already selected and user clicks again, start a new selection
+                else {
+                    // Clear previous selection (turn all yellow back to green)
+                    blocks.forEach(b => {
+                        if (b.classList.contains('bg-warning')) {
+                            b.classList.remove('bg-warning');
+                            b.classList.add('bg-success');
+                        }
+                    });
+                    // Reset form and variables
+                    reserveBtn.disabled = true;
+                    startInput.value = "";
+                    endInput.value = "";
+                    startIndex = index;
+                    endIndex = null;
+                    // Highlight new start
+                    block.classList.remove('bg-success');
+                    block.classList.add('bg-warning');
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

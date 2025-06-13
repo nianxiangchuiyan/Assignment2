@@ -1,0 +1,131 @@
+<!-- templates/make_reservation.html -->
+{% extends 'base.html' %}
+{% block title %}Reserve {{ room.name }}{% endblock %}
+{% block content %}
+    <h2>Reserve: {{ room.name }}</h2>
+    <p><strong>Location:</strong> {{ room.location }}</p>
+    <p><strong>Capacity:</strong> {{ room.capacity }}</p>
+
+    <!-- 时间格子 -->
+    <div class="container text-center">
+        <div class="d-flex flex-wrap justify-content-center">
+            {% for slot in slots %}
+                <div class="time-block border rounded m-1
+                  {% if slot.status == 'booked' %} bg-danger text-white
+                  {% else %} bg-success text-white {% endif %}"
+                     data-index="{{ forloop.counter0 }}" data-time="{{ slot.time }}">
+                    {{ slot.time }}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <form method="post" class="mt-3">
+        {% csrf_token %}
+        <input type="hidden" name="start_time" id="start_time_input">
+        <input type="hidden" name="end_time" id="end_time_input">
+        <button type="submit" id="reserveBtn" class="btn btn-primary" disabled>Confirm Reservation</button>
+    </form>
+
+    <style>
+        .time-block {
+            width: 4rem;
+            height: 4rem;
+            line-height: 4rem;
+            cursor: pointer;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const blocks = document.querySelectorAll('.time-block');
+            const startInput = document.getElementById('start_time_input');
+            const endInput = document.getElementById('end_time_input');
+            const reserveBtn = document.getElementById('reserveBtn');
+
+            let startIndex = null;
+            let endIndex = null;
+
+            blocks.forEach(block => {
+                block.addEventListener('click', () => {
+                    if (block.classList.contains('bg-danger')) return;
+                    const index = parseInt(block.dataset.index);
+
+                    // 修改点击逻辑中的第一步（startIndex 被选后立即启用按钮）
+                    if (startIndex === null) {
+                        startIndex = index;
+                        block.classList.remove('bg-success');
+                        block.classList.add('bg-warning');
+
+                        // 自动启用按钮，设置默认 +30分钟的 end
+                        reserveBtn.disabled = false;
+                        startInput.value = block.dataset.time;
+
+                        // 计算 end_time (+30 mins)
+                        let [h, m] = block.dataset.time.split(':').map(Number);
+                        m += 30;
+                        if (m === 60) {
+                            h += 1;
+                            m = 0;
+                        }
+                        const endTimeStr = ('0' + h).slice(-2) + ':' + ('0' + m).slice(-2);
+                        endInput.value = endTimeStr;
+
+                    } else if (endIndex === null) {
+                        endIndex = index;
+                        if (endIndex < startIndex) [startIndex, endIndex] = [endIndex, startIndex];
+
+                        let conflict = false;
+                        blocks.forEach(b => {
+                            const i = parseInt(b.dataset.index);
+                            if (i >= startIndex && i <= endIndex && b.classList.contains('bg-danger')) conflict = true;
+                        });
+
+                        if (conflict) {
+                            alert("Selected range includes an already booked slot. Please choose a different range.");
+                            blocks.forEach(b => {
+                                if (b.classList.contains('bg-warning')) {
+                                    b.classList.remove('bg-warning');
+                                    b.classList.add('bg-success');
+                                }
+                            });
+                            startIndex = endIndex = null;
+                        } else {
+                            blocks.forEach(b => {
+                                const i = parseInt(b.dataset.index);
+                                if (i >= startIndex && i <= endIndex && b.classList.contains('bg-success')) {
+                                    b.classList.remove('bg-success');
+                                    b.classList.add('bg-warning');
+                                }
+                            });
+                            reserveBtn.disabled = false;
+                            startInput.value = blocks[startIndex].dataset.time;
+
+                            let [h, m] = blocks[endIndex].dataset.time.split(":".map(Number));
+                            m += 30;
+                            if (m === 60) {
+                                h += 1;
+                                m = 0;
+                            }
+                            endInput.value = ('0' + h).slice(-2) + ':' + ('0' + m).slice(-2);
+                        }
+                    } else {
+                        blocks.forEach(b => {
+                            if (b.classList.contains('bg-warning')) {
+                                b.classList.remove('bg-warning');
+                                b.classList.add('bg-success');
+                            }
+                        });
+                        reserveBtn.disabled = true;
+                        startInput.value = "";
+                        endInput.value = "";
+                        startIndex = index;
+                        endIndex = null;
+                        block.classList.remove('bg-success');
+                        block.classList.add('bg-warning');
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

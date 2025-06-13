@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Room List{% endblock %}
+
+{% block content %}
+    <h2>Available Rooms <a class="btn btn-outline-primary ms-2" href="{% url 'all_rooms' %}">Book a Room</a>
+    </h2>
+    <div class="row">
+        {% for room in rooms %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ room.name }}</h5>
+                        <h6 class="card-subtitle text-muted mb-2">Location: {{ room.location }}</h6>
+                        <p class="card-text">
+                            Capacity: {{ room.capacity }}<br>
+                            {{ room.description|default:"No description." }}
+                        </p>
+
+                        <a href="{% url 'make_reservation' room.id %}" class="btn btn-outline-success mt-2">Details</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p>No rooms available.</p>
+        {% endfor %}
+    </div>
+{% endblock %}
