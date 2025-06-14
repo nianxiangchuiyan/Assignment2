@@ -1,14 +1,17 @@
-from django.contrib import messages
-from django.urls import reverse
-from django.utils.timezone import localtime, make_aware
-from django.views.generic import TemplateView
+from datetime import datetime, time, timedelta
 
-from .forms import CustomUserCreationForm, ReservationForm, TimeOnlyReservationForm
+from django.contrib import messages
 from django.contrib.auth import login
-from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+from django.shortcuts import render, get_object_or_404
+from django.urls import reverse
 from django.utils import timezone
-from datetime import datetime, time, timedelta, date
+from django.utils.timezone import localtime, make_aware
+from django.views import View
+
+from .forms import CustomUserCreationForm
 from .models import Room, Reservation
 
 
@@ -32,17 +35,9 @@ def home(request):
     return render(request, 'home.html')
 
 
-from django.contrib.auth import logout
-from django.shortcuts import redirect
-
-
 def logout_view(request):
     logout(request)
     return redirect('login')  # or redirect to home
-
-
-from django.views import View
-from django.contrib import messages
 
 
 class ProfileDetail(View):
