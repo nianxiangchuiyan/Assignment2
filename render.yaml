@@ -3,7 +3,7 @@ services:
     name: django-backend
     env: python
     buildCommand: ""
-    startCommand: gunicorn Assignment1.wsgi:application
+    startCommand: gunicorn Assignment1.wsgi:application --log-file - --workers 1 --threads 4 --timeout 120
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: Assignment1.settings
