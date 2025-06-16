@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import RoomsPage from "./pages/RoomsPage";
 import MyReservationsPage from "./pages/MyReservationsPage";
 import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
     return (

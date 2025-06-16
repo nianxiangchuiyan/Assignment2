@@ -321,3 +321,4 @@ def all_rooms_view(request):
         "next_date": selected_date + timedelta(days=1),
         "today": timezone.localdate(),
     })
+

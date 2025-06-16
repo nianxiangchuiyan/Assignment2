@@ -1,0 +1,6 @@
+/* 让表格文字更紧凑，模仿原 Django 模板 */
+.table th,
+.table td {
+    padding: 0.35rem;
+    font-size: 0.85rem;
+}

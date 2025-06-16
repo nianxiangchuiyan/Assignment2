@@ -1,8 +1,8 @@
+from django.contrib.auth import get_user_model
 from rest_framework import viewsets, permissions
-from rest_framework.response import Response
+
 from .models import Room, Reservation
 from .serializers import RoomSerializer, ReservationSerializer, UserSerializer
-from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
@@ -14,12 +14,21 @@ class RoomViewSet(viewsets.ModelViewSet):
 
 
 class ReservationViewSet(viewsets.ModelViewSet):
-    queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        qs = Reservation.objects.all()
+        date = self.request.query_params.get('date')
+        if date:
+            # 过滤 start_time 的日期部分
+            qs = qs.filter(start_time__date=date)
+        return qs
+
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        reservation = serializer.save(user=self.request.user)
+        reservation.full_clean()
+        reservation.save()
 
 
 class UserViewSet(viewsets.ModelViewSet):

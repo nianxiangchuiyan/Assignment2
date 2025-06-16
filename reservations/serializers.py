@@ -15,12 +15,10 @@ class RoomSerializer(serializers.ModelSerializer):
 
 
 class ReservationSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField(read_only=True)
-
     class Meta:
         model = Reservation
-        fields = '__all__'
-
+        fields = ['id', 'room', 'start_time', 'end_time', 'status', 'date']
+        read_only_fields = ['id', 'user', 'status']
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

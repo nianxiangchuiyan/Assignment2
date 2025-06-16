@@ -1,8 +1,6 @@
 # Create your models here.
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
 from django.db import models
-from django.conf import settings
 
 
 class Room(models.Model):
@@ -20,41 +18,62 @@ class Room(models.Model):
         return self.name
 
 
+from django.db import models
+from django.conf import settings
+from django.core.exceptions import ValidationError
+
 class Reservation(models.Model):
-    """
-    The Reservation model represents a booking made by a user.
-    It establishes foreign key relationships with both the Room and the User models.
-    """
     STATUS_CHOICES = [
-        'pending',
-        'confirmed',
-        'cancelled'
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('cancelled', 'Cancelled'),
     ]
-    room = models.ForeignKey(Room, related_name='reservations', on_delete=models.CASCADE)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='reservations', on_delete=models.CASCADE)
+
+    room = models.ForeignKey(
+        'Room',
+        related_name='reservations',
+        on_delete=models.CASCADE
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='reservations',
+        on_delete=models.CASCADE
+    )
     start_time = models.DateTimeField(help_text="Reservation start time")
     end_time = models.DateTimeField(help_text="Reservation end time")
-    created_at = models.DateTimeField(auto_now_add=True, help_text="Time the reservation was created")
-    updated_at = models.DateTimeField(auto_now=True, help_text="Time the reservation was last updated")
+
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='pending'
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['start_time']
+        indexes = [
+            models.Index(fields=['room', 'start_time', 'end_time']),
+        ]
 
     def __str__(self):
-        return f"Reservation for {self.room.name} by {self.user.username} on {self.start_time.strftime('%Y-%m-%d %H:%M')}"
+        return f"{self.room.name} | {self.user.username} | {self.start_time:%Y-%m-%d %H:%M}"
 
     def clean(self):
-        """
-        验证预订时间是否与现有预订冲突。
-        """
-        overlapping_reservations = Reservation.objects.filter(
+        # 结束时间必须晚于开始时间
+        if self.end_time <= self.start_time:
+            raise ValidationError("End time must be after start time.")
+
+        # 冲突校验
+        overlap = Reservation.objects.filter(
             room=self.room,
             start_time__lt=self.end_time,
             end_time__gt=self.start_time
         ).exclude(id=self.id)
 
-        if overlapping_reservations.exists():
-            raise ValidationError("This reservation conflicts with an existing reservation, try another time.")
+        if overlap.exists():
+            raise ValidationError("This reservation conflicts with an existing reservation.")
 
 
 class CustomUser(AbstractUser):
