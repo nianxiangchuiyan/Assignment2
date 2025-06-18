@@ -24,6 +24,7 @@ export default function RoomsPage() {
           axios.get('rooms/'),
           axios.get(`reservations/?date=${selectedDate.format('YYYY-MM-DD')}`)
         ]);
+        console.log('📥 Loaded reservations:', resvRes.data);
         setRooms(roomRes.data);
         setReservations(resvRes.data);
       } catch (err) {
@@ -42,7 +43,7 @@ export default function RoomsPage() {
   });
 
 
-  const toHHMM = (isoStr) => isoStr.slice(11, 16);  // "2025-06-16T08:00:00Z" -> "08:00"
+  const toHHMM = (isoStr) => dayjs(isoStr).format('HH:mm');
 
 // 判断房间某时段是否已被预订
   const isBooked = (roomId, slot) =>
@@ -77,25 +78,48 @@ export default function RoomsPage() {
     const endISO = `${dateStr}T${endTime}:00`;    // 加 :00
     // 3. 二次确认
     if (!window.confirm(`Book Room ${roomId}\nFrom ${startTime} to ${endTime}?`)) return;
-
     try {
+      console.log('📤 Booking Room', roomId, 'from', startTime, 'to', endTime);
 
+      // 先预定
       await axios.post('reservations/', {
         room: roomId,
         start_time: startISO,
         end_time: endISO,
       });
 
+      console.log(' Booking success, refreshing data...');
 
-      // 重新获取预约数据
+      // 然后刷新数据
       const res = await axios.get(
           `reservations/?date=${selectedDate.format('YYYY-MM-DD')}`
       );
+      console.log(' current reservations:', res.data);
       setReservations(res.data);
+
     } catch (err) {
-      console.error(err, err.response?.data);
+      console.error('❌ Booking failed', err, err.response?.data);
       alert('Booking failed.');
     }
+
+    //   try {
+    //     console.log('Booking Room', roomId, 'from', startTime, 'to', endTime);
+    //     await axios.post('reservations/', {
+    //
+    //       room: roomId,
+    //       start_time: startISO,
+    //       end_time: endISO,});
+    //     // 重新获取预约数据
+    //     const res = await axios.get(
+    //         `reservations/?date=${selectedDate.format('YYYY-MM-DD')}`
+    //     );
+    //     console.log(res.data);
+    //
+    //     setReservations(res.data);
+    //   } catch (err) {
+    //     console.error(err, err.response?.data);
+    //     alert('Booking failed.');
+    //   }
   };
 
 
