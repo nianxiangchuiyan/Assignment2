@@ -20,10 +20,10 @@ class ReservationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = Reservation.objects.all()
-        date = self.request.query_params.get('date')
-        if date:
-            # 过滤 start_time 的日期部分
-            qs = qs.filter(start_time__date=date)
+        # date = self.request.query_params.get('date')
+        # if date:
+        #     # 过滤 start_time 的日期部分
+        #     qs = qs.filter(start_time__date=date)
         return qs
 
     def perform_create(self, serializer):
