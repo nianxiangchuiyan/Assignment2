@@ -17,7 +17,7 @@ class RoomSerializer(serializers.ModelSerializer):
 class ReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
-        fields = ['id', 'room', 'start_time', 'end_time', 'status', 'date']
+        fields = '__all__'
         read_only_fields = ['id', 'user', 'status']
 
 class UserSerializer(serializers.ModelSerializer):
