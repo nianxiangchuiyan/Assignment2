@@ -27,12 +27,11 @@ class ReservationViewSet(viewsets.ModelViewSet):
         return qs
 
     def perform_create(self, serializer):
-        reservation = serializer.save(user=self.request.user)
-        reservation.full_clean()
-        reservation.save()
+        print(f"calling perform_create")
         instance = serializer.save(user=self.request.user)
+        instance.full_clean()
+        instance.save()
         print(f"Reservation created: {instance}")
-
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
