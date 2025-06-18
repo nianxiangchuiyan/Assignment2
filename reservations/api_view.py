@@ -30,6 +30,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
         reservation = serializer.save(user=self.request.user)
         reservation.full_clean()
         reservation.save()
+        instance = serializer.save(user=self.request.user)
+        print(f"Reservation created: {instance}")
 
 
 class UserViewSet(viewsets.ModelViewSet):

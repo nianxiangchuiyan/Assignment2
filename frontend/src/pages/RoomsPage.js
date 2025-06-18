@@ -84,8 +84,6 @@ export default function RoomsPage() {
         room: roomId,
         start_time: startISO,
         end_time: endISO,
-
-
       });
 
 
