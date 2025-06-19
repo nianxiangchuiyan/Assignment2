@@ -1,4 +1,7 @@
+from datetime import datetime, timedelta
+
 from django.contrib.auth import get_user_model
+from django.utils.timezone import make_aware
 from rest_framework import viewsets, permissions
 
 from .models import Room, Reservation
@@ -20,10 +23,16 @@ class ReservationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = Reservation.objects.all()
-        # date = self.request.query_params.get('date')
-        # if date:
-        #     # 过滤 start_time 的日期部分
-        #     qs = qs.filter(start_time__date=date)
+        date_str = self.request.query_params.get('date')
+        print("🔍 Filtering by date:", date_str)
+        if date_str:
+            print("✅ Matched reservations:", list(qs))
+            try:
+                start = make_aware(datetime.strptime(date_str, '%Y-%m-%d'))
+                end = start + timedelta(days=1)
+                qs = qs.filter(start_time__gte=start, start_time__lt=end)
+            except Exception as e:
+                print("Date parse error:", e)
         return qs
 
     def perform_create(self, serializer):
