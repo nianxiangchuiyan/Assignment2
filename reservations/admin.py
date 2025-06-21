@@ -1,12 +1,10 @@
-from django.contrib import admin
-
 # Register your models here.
-from django.contrib import admin
-from .models import Room, Reservation, CustomUser
 
 from django.contrib import admin
-from .models import Room, Reservation, CustomUser
 from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
+
+from .models import Room, Reservation, CustomUser
 
 
 # 5.1 Room 管理
@@ -35,3 +33,7 @@ class CustomUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
         (None, {'fields': ('is_admin',)}),
     )
+
+
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
